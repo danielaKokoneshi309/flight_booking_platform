@@ -20,6 +20,7 @@ export class FlightsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
+    
     return this.flightsService.findOne(+id);
   }
 
