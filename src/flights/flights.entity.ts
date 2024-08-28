@@ -11,9 +11,9 @@ departureCountry:string;
 @Column()
 destianationCountry:string;
 @Column()
-departureTime: Date
+departureTime: Date;
 @Column()
-arrivaleTime:Date
+arrivaleTime:Date;
 @Column()
 price: number
   

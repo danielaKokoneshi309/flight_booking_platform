@@ -3,9 +3,15 @@ import { FlightsService } from './flights.service';
 import { CreateFlightDto } from './dto/create-flight.dto';
 import { UpdateFlightDto } from './dto/update-flight.dto';
 
+
 @Controller('/flights')
 export class FlightsController {
   constructor(private  flightsService: FlightsService) {}
+
+  @Get('/upcoming')
+  findAllUpcomingFlights(){
+    return this.flightsService.findUpcomingFlights();
+  }
 
   @Post()
   async create(@Body() createFlightDto: CreateFlightDto) {
@@ -23,7 +29,7 @@ export class FlightsController {
     
     return this.flightsService.findOne(+id);
   }
-
+  
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateFlightDto: UpdateFlightDto) {
     return this.flightsService.update(+id, updateFlightDto);

@@ -1,16 +1,16 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateFlightDto } from './dto/create-flight.dto';
-import { UpdateFlightDto } from './dto/update-flight.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
 import { Flight } from './flights.entity';
+
 
 @Injectable()
 export class FlightsService {
   constructor(@InjectRepository(Flight) private repo: Repository<Flight>) {}
 
-  create(createFlightDto: CreateFlightDto) {
-    const flight = this.repo.create(createFlightDto);
+  async create(createFlightDto: CreateFlightDto) {
+    const flight =  await this.repo.create(createFlightDto);
     return  this.repo.save(flight);
   }
 
@@ -42,4 +42,16 @@ findOne(id: number) {
     }
     return this.repo.remove(flight);
   }
+
+  async findUpcomingFlights(){
+
+    const today = new Date();
+    const upcomingFlights = await this.repo
+      .createQueryBuilder('flight')
+      .where('"flight"."departureTime" >= :today', { today: today.toISOString() })
+      .orderBy('"flight"."departureTime"', 'ASC')
+      .getMany();
+   return upcomingFlights;
+
+}
 }
