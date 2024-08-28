@@ -10,9 +10,9 @@ id: number;
 departureCountry:string;
 @Column()
 destianationCountry:string;
-@Column()
+@Column('timestamp with time zone')
 departureTime: Date;
-@Column()
+@Column('timestamp with time zone')
 arrivaleTime:Date;
 @Column()
 price: number

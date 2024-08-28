@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { FlightsService } from './flights.service';
 import { CreateFlightDto } from './dto/create-flight.dto';
 import { UpdateFlightDto } from './dto/update-flight.dto';
+import { GetFlightDto } from './dto/get-flight.dto';
 
 
 @Controller('/flights')
@@ -12,17 +13,19 @@ export class FlightsController {
   findAllUpcomingFlights(){
     return this.flightsService.findUpcomingFlights();
   }
-
+  @Get()
+  getFlights(@Query() query:GetFlightDto ) {
+    return this.flightsService.getFlights(query);
+  }
+  
+ 
   @Post()
+  
   async create(@Body() createFlightDto: CreateFlightDto) {
     
     return await this.flightsService.create(createFlightDto);
   }
 
-  @Get()
-  findAll() {
-    return this.flightsService.findAll();
-  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
