@@ -57,7 +57,6 @@ async findUpcomingFlights(){
 async getFlights({ departureTime, destianationCountry, departureCountry }: GetFlightDto) {
   const queryBuilder = this.repo.createQueryBuilder('flight');
 
-
   if (departureTime) {
     
     queryBuilder.andWhere('flight.departureTime = :departureTime', { departureTime });
@@ -70,12 +69,21 @@ async getFlights({ departureTime, destianationCountry, departureCountry }: GetFl
     queryBuilder.andWhere('flight.departureCountry = :departureCountry', { departureCountry });
   }
 
-  
   const flights = await queryBuilder.getMany();
   
   return flights;
 }
 
+async getNumberOfFlights(){
+  const today = new Date();
+  const flightCount = await this.repo
+    .createQueryBuilder('flight')
+    .select('COUNT(id)', 'NumberOfFlights')
+    .where('"flight"."arrivaleTime" <= :today',{  today })
+    .getRawMany();
+  
+ return flightCount;
 
+}
 
 }

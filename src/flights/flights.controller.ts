@@ -13,19 +13,20 @@ export class FlightsController {
   findAllUpcomingFlights(){
     return this.flightsService.findUpcomingFlights();
   }
+  @Get('/numberOfFlights')
+  flightCount(){
+    return this.flightsService.getNumberOfFlights();
+  }
   @Get()
   getFlights(@Query() query:GetFlightDto ) {
     return this.flightsService.getFlights(query);
   }
   
- 
   @Post()
-  
   async create(@Body() createFlightDto: CreateFlightDto) {
     
     return await this.flightsService.create(createFlightDto);
   }
-
 
   @Get(':id')
   findOne(@Param('id') id: string) {
