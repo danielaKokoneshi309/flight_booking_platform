@@ -71,7 +71,6 @@ async remove(id: number): Promise<void> {
     }
     try{
       await this.repo.remove(flight);
-    
     }
     catch{
       throw new BadRequestException('Could not remove flight');

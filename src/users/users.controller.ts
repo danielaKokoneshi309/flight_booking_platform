@@ -8,9 +8,12 @@ import { Users } from './user.entity';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { AdminGuard } from 'src/guards/admin.guard';
 import { SignInDto } from './dto/signin.user.dto';
+import { Serialize } from 'src/interceptors/serialize.interceptor';
+import { UserDto } from './dto/user.dto';
 
 
 @Controller('/users')
+@Serialize(UserDto)
 export class UsersController {
   constructor(
     private  usersService: UsersService,
@@ -27,12 +30,12 @@ export class UsersController {
   async signin(@Body() body:SignInDto, @Session() session: any) {
     const user = await this.authService.signin(body.email, body.password);
     session.userId = user.id;
-    return { email: user.email, password: user.password };
+    return user;
   }
   @UseGuards(AuthGuard)
   @Get('/whoami')
   whoAmI(@CurrentUser() user: Users) {
-    return { email: user.email, password: user.password };
+    return user;
   }
   @UseGuards(AuthGuard)
   @Post('/signout')
