@@ -7,6 +7,7 @@ import { CurrentUser } from './decorators/current-user.decorators';
 import { Users } from './user.entity';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { AdminGuard } from 'src/guards/admin.guard';
+import { SignInDto } from './dto/signin.user.dto';
 
 
 @Controller('/users')
@@ -23,15 +24,15 @@ export class UsersController {
     return user;
   }
   @Post('/signin')
-  async signin(@Body() body: CreateUserDto, @Session() session: any) {
+  async signin(@Body() body:SignInDto, @Session() session: any) {
     const user = await this.authService.signin(body.email, body.password);
     session.userId = user.id;
-    return user;
+    return { email: user.email, password: user.password };
   }
   @UseGuards(AuthGuard)
   @Get('/whoami')
   whoAmI(@CurrentUser() user: Users) {
-    return user;
+    return { email: user.email, password: user.password };
   }
   @UseGuards(AuthGuard)
   @Post('/signout')

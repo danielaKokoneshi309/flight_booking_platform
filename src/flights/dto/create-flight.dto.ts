@@ -19,5 +19,7 @@ arrivaleTime:Date
 @Max(10000)
 @IsNotEmpty()
 price: number
-  
+@IsNotEmpty()
+@IsNumber()
+planeId:number
 }

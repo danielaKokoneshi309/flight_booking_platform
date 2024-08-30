@@ -33,7 +33,7 @@ export class FlightsController {
   async getFlights(  @Query() query:GetFlightDto,@CurrentUser() user:Users) {
      return await this.flightsService.getFlights(query,user);;
   }
-  @UseGuards(AdminGuard)
+  // @UseGuards(AdminGuard)
   @Post()
   async create(@Body() createFlightDto: CreateFlightDto) {
     

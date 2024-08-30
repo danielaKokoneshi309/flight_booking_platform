@@ -5,21 +5,38 @@ import { Repository } from 'typeorm';
 import { Flight } from './flights.entity';
 import { GetFlightDto } from './dto/get-flight.dto';
 import { Users } from 'src/users/user.entity';
+import { Plane } from 'src/planes/plane.entity';
 
 
 @Injectable()
 export class FlightsService {
 
-  constructor(@InjectRepository(Flight) private repo: Repository<Flight>) {}
+  constructor(@InjectRepository(Flight) private repo: Repository<Flight>,
+  @InjectRepository(Plane) private planeRepo: Repository<Plane>) {}
   
+
 async create(createFlightDto: CreateFlightDto): Promise<Flight> {
+  const { planeId, departureTime, arrivaleTime } = createFlightDto;
   try{
-    console.log(typeof createFlightDto.arrivaleTime);
-    const flight = this.repo.create(createFlightDto);
-    const savedFlight= await this.repo.save(flight);
-    return  savedFlight;
+    const plane= await this.planeRepo.findOne({ where: { id: planeId } })
+  if (!plane) {
+    throw new NotFoundException('Plane not found');
   }
-    catch{
+  const conflictingFlight = await this.repo.createQueryBuilder('flight')
+    .where('"flight"."planeId" = :planeId', { planeId })
+    .andWhere('"flight"."departureTime" < :arrivaleTime', { arrivaleTime })
+    .andWhere('"flight"."arrivaleTime" > :departureTime', { departureTime })
+    .getOne();
+   
+  if (conflictingFlight) {
+    throw new BadRequestException('Plane is not available for the given time range');
+  }
+
+  const flight = this.repo.create(createFlightDto);
+  const savedFlight = await this.repo.save(flight);
+  return savedFlight;
+  }
+    catch(error){
       throw new BadRequestException('Could not create flight');
     }
   }
@@ -31,7 +48,6 @@ async findOne(id: number): Promise<Flight | null> {
     }
      return flight;
   }
-  
 
 async update(id: number, attrs: Partial<Flight>) {
   const flight = await this.findOne(id);
@@ -87,7 +103,9 @@ async getFlights({ departureTime, destianationCountry, departureCountry }: GetFl
   if (departureTime) {
 
     queryBuilder.andWhere('flight.departureTime = :departureTime', { departureTime });  
+   
   }
+
   if (destianationCountry) {
     queryBuilder.andWhere('flight.destianationCountry = :destianationCountry', { destianationCountry });
   }
