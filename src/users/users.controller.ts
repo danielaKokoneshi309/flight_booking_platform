@@ -8,6 +8,7 @@ import { Users } from './user.entity';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { AdminGuard } from 'src/guards/admin.guard';
 
+
 @Controller('/users')
 export class UsersController {
   constructor(
@@ -27,10 +28,12 @@ export class UsersController {
     session.userId = user.id;
     return user;
   }
+  @UseGuards(AuthGuard)
   @Get('/whoami')
   whoAmI(@CurrentUser() user: Users) {
     return user;
   }
+  @UseGuards(AuthGuard)
   @Post('/signout')
   signOut(@Session() session: any) {
     session.userId = null;
@@ -42,17 +45,18 @@ export class UsersController {
   findAll() {
     return this.usersService.findAll();
   }
-
+  @UseGuards(AuthGuard)
+  @UseGuards(AdminGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }
-
+  @UseGuards(AuthGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);
   }
-
+  @UseGuards(AuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);

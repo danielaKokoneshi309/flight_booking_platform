@@ -12,29 +12,28 @@ import { CurrentUser } from 'src/users/decorators/current-user.decorators';
 @Controller('/flights')
 export class FlightsController {
   constructor(private  flightsService: FlightsService) {}
-
- 
   
   @Get('/upcoming')
   async findAllUpcomingFlights(){
     return await this.flightsService.findUpcomingFlights();
   }
-
+  @UseGuards(AdminGuard)
   @Get('/numberOfFlights')
   async flightCount(){
     return await this.flightsService.getNumberOfFlights();
   }
+  @UseGuards(AdminGuard)
   @Get('/flightsList')
   async findAll() {
     
     return await this.flightsService.findAll();
   }
-  // @UseGuards(AdminGuard)
+ 
   @Get()
   async getFlights(  @Query() query:GetFlightDto,@CurrentUser() user:Users) {
      return await this.flightsService.getFlights(query,user);;
   }
-  
+  @UseGuards(AdminGuard)
   @Post()
   async create(@Body() createFlightDto: CreateFlightDto) {
     
@@ -46,12 +45,12 @@ export class FlightsController {
     
     return await this.flightsService.findOne(+id);
   }
-  
+  @UseGuards(AdminGuard)
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateFlightDto: UpdateFlightDto) {
     return await this.flightsService.update(+id, updateFlightDto);
   }
-
+  @UseGuards(AdminGuard)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return await this.flightsService.remove(+id);
