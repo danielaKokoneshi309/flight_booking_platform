@@ -11,5 +11,8 @@ export class GetFlightDto{
     @IsOptional()
     @IsString()
     departureCountry:string;
+    @IsDateString()
+    @IsOptional()
+    arrivaleTime:Date;
 
 }

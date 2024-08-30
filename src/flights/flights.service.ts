@@ -95,7 +95,7 @@ async getFlights({ departureTime, destianationCountry, departureCountry }: GetFl
     
     departureCountry = user.countryOfOrigin;
   }
-  if (departureCountry && false) {
+  if (departureCountry ) {
  
     queryBuilder.andWhere('flight.departureCountry = :departureCountry', { departureCountry });
   }

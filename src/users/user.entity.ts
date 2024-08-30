@@ -20,6 +20,6 @@ password:string;
 credits:number;
 @Column({ nullable: false })
 countryOfOrigin:string;
-@OneToMany(() => Flight, (flight) => flight.user)
-flights: Flight[];
+// @OneToMany(() => Flight, (flight) => flight.user)
+// flights: Flight[];
 }

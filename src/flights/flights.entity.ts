@@ -1,4 +1,5 @@
 
+import { Plane } from 'src/planes/plane.entity';
 import { Users } from 'src/users/user.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 
@@ -18,6 +19,8 @@ departureTime: Date;
 arrivaleTime:Date;
 @Column()
 price: number
-@ManyToOne(() => Users, (user) => user.flights)
-  user: Users;
+// @ManyToOne(() => Users, (user) => user.flights)
+//   user: Users;
+@ManyToOne(() => Plane, (plane) => plane.flights)
+  plane: Plane;
 }
