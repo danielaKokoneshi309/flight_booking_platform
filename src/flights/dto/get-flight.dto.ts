@@ -1,11 +1,14 @@
-import{IsString,IsDateString} from 'class-validator';
-import { Transform } from 'class-transformer';
+import{IsString,IsDateString, IsEmpty, IsOptional} from 'class-validator';
+
 
 export class GetFlightDto{
     @IsDateString()
+    @IsOptional()
     departureTime: Date;
+    @IsOptional()
     @IsString()
     destianationCountry:string;
+    @IsOptional()
     @IsString()
     departureCountry:string;
 

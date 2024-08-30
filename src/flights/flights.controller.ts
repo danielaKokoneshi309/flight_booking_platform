@@ -1,25 +1,38 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
 import { FlightsService } from './flights.service';
 import { CreateFlightDto } from './dto/create-flight.dto';
 import { UpdateFlightDto } from './dto/update-flight.dto';
 import { GetFlightDto } from './dto/get-flight.dto';
+import { AdminGuard } from 'src/guards/admin.guard';
+import { AuthGuard } from 'src/guards/auth.guard';
+import { Users } from 'src/users/user.entity';
+import { CurrentUser } from 'src/users/decorators/current-user.decorators';
 
-
+@UseGuards(AuthGuard)
 @Controller('/flights')
 export class FlightsController {
   constructor(private  flightsService: FlightsService) {}
 
+ 
+  
   @Get('/upcoming')
-  findAllUpcomingFlights(){
-    return this.flightsService.findUpcomingFlights();
+  async findAllUpcomingFlights(){
+    return await this.flightsService.findUpcomingFlights();
   }
+
   @Get('/numberOfFlights')
-  flightCount(){
-    return this.flightsService.getNumberOfFlights();
+  async flightCount(){
+    return await this.flightsService.getNumberOfFlights();
   }
+  @Get('/flightsList')
+  async findAll() {
+    
+    return await this.flightsService.findAll();
+  }
+  // @UseGuards(AdminGuard)
   @Get()
-  getFlights(@Query() query:GetFlightDto ) {
-    return this.flightsService.getFlights(query);
+  async getFlights(  @Query() query:GetFlightDto,@CurrentUser() user:Users) {
+     return await this.flightsService.getFlights(query,user);;
   }
   
   @Post()
@@ -29,18 +42,18 @@ export class FlightsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     
-    return this.flightsService.findOne(+id);
+    return await this.flightsService.findOne(+id);
   }
   
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateFlightDto: UpdateFlightDto) {
-    return this.flightsService.update(+id, updateFlightDto);
+  async update(@Param('id') id: string, @Body() updateFlightDto: UpdateFlightDto) {
+    return await this.flightsService.update(+id, updateFlightDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.flightsService.remove(+id);
+  async remove(@Param('id') id: string) {
+    return await this.flightsService.remove(+id);
   }
 }

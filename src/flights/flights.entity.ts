@@ -1,4 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+
+import { Users } from 'src/users/user.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 
 
 @Entity()
@@ -16,7 +18,6 @@ departureTime: Date;
 arrivaleTime:Date;
 @Column()
 price: number
-  
-
-
+@ManyToOne(() => Users, (user) => user.flights)
+  user: Users;
 }
