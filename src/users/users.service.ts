@@ -30,8 +30,8 @@ export class UsersService {
     return this.repo.find({ where: { email } });
   }
 
-  async update(id: number, attrs: Partial<Users>) {
-    const users = await this.findOne(id);
+  async update( users:Users,attrs: Partial<Users>) {
+    
       if (!users) {
       throw new NotFoundException('User not found');
       }
