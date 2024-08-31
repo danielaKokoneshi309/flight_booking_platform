@@ -9,8 +9,7 @@ export class Booking {
   id: number;
 
   @Column()
- 
-  seatNumber?: string;
+ seatNumber?: string;
 
   @Column({ default: false })
   isApproved: boolean;

@@ -1,5 +1,5 @@
 
-import { Injectable, BadRequestException, UseGuards } from '@nestjs/common';
+import { Injectable, BadRequestException, UseGuards, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Booking } from './booking.entity';
@@ -112,4 +112,22 @@ export class BookingsService {
     const seatLetter = String.fromCharCode(65 + (seatIndex - 1) % 6); 
     return `${row}${seatLetter}`;
   }
+  async changeApproval(id: number, isApproved: boolean) {
+    try{
+      const booking = await this.bookingRepository.findOneBy({ id });
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    booking.isApproved = isApproved;
+    return this.bookingRepository.save(booking);
+    }
+    catch(error){
+      console.log(error)
+    throw new BadRequestException("Could not update")
+    }
+    
+  }
 }
+
+
