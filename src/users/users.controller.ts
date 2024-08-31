@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Session, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Session, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -61,9 +61,15 @@ export class UsersController {
   update(@CurrentUser()users:Users, @Body()updateUserDto: UpdateUserDto ) {
     return this.usersService.update(users, updateUserDto);
   }
+  
   @UseGuards(AuthGuard)
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  @Delete(':id?')
+  remove(
+    @Param('id', new ParseIntPipe({ optional: true })) id: string | null,
+    @CurrentUser() currentUser: Users
+  ) {
+    const numericId = id ? parseInt(id, 10) : null; 
+    return this.usersService.remove(numericId, currentUser);
   }
+  
 }

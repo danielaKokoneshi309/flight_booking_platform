@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -45,17 +45,23 @@ export class UsersService {
       }
     }
 
-    async remove(id: number): Promise<void> {
-      
-      const users= await this.findOne(id);
-      if (!users) {
+   
+    async remove(id: number, currentUser: Users): Promise<void> {
+      const userIdToDelete = id ?? currentUser.id;
+      const userToDelete = await this.findOne(userIdToDelete);
+    
+      if (!userToDelete) {
         throw new NotFoundException('User not found');
       }
-      try{
-        await this.repo.remove(users);
-      }
-      catch{
-        throw new BadRequestException('Could not remove user');
+    
+      if (currentUser.IsAdmin || currentUser.id === userIdToDelete) {
+        try {
+          await this.repo.remove(userToDelete);
+        } catch {
+          throw new BadRequestException('Could not remove user');
+        }
+      } else {
+        throw new ForbiddenException('You are not allowed to delete this user');
       }
     }
 }
