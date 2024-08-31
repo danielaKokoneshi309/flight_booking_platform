@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, BeforeInsert } from 'typeorm';
 import { Flight } from 'src/flights/flights.entity';
 
 @Entity()
@@ -14,5 +14,6 @@ export class Plane {
 
   @OneToMany(() => Flight, (flight) => flight.plane)
   flights: Flight[];
+ 
 }
 

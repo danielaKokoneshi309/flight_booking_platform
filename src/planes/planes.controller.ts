@@ -8,6 +8,7 @@ import { AuthGuard } from 'src/guards/auth.guard';
 @Controller('/planes')
 export class PlanesController {
   constructor(private  planesService: PlanesService) {}
+  
   @UseGuards(AdminGuard)
   @Get()
   findAvailablePlanes(@Query() query:GetFlightDto) {

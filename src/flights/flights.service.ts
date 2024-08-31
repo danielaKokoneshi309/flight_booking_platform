@@ -27,16 +27,18 @@ async create(createFlightDto: CreateFlightDto): Promise<Flight> {
     .andWhere('"flight"."departureTime" < :arrivaleTime', { arrivaleTime })
     .andWhere('"flight"."arrivaleTime" > :departureTime', { departureTime })
     .getOne();
-   
+   console.log(planeId)
   if (conflictingFlight) {
     throw new BadRequestException('Plane is not available for the given time range');
   }
-
-  const flight = this.repo.create(createFlightDto);
+ 
+  const flight = this.repo.create( createFlightDto,);
+  flight.plane = plane;
   const savedFlight = await this.repo.save(flight);
   return savedFlight;
   }
     catch(error){
+      console.log(error)
       throw new BadRequestException('Could not create flight');
     }
   }
@@ -59,7 +61,8 @@ async update(id: number, attrs: Partial<Flight>) {
       const updatedFlight = await this.repo.save(flight);
     return updatedFlight;
     }
-    catch{
+    catch(error){
+      console.log(error)
       throw new BadRequestException('Could not update flight');
     }
   }
@@ -138,3 +141,7 @@ async getNumberOfFlights(){
 catch{
   throw new BadRequestException('Could not retrieve number of flights');
 }}}
+function setDefaultAvailableSeats() {
+  throw new Error('Function not implemented.');
+}
+

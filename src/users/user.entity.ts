@@ -1,3 +1,4 @@
+import { Booking } from 'src/bookings/booking.entity';
 import { Flight } from 'src/flights/flights.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
@@ -20,6 +21,7 @@ password:string;
 credits:number;
 @Column({ nullable: false })
 countryOfOrigin:string;
-// @OneToMany(() => Flight, (flight) => flight.user)
-// flights: Flight[];
+
+@OneToMany(() => Booking, (booking) => booking.user)
+  bookings: Booking[];
 }
