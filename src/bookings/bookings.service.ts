@@ -139,11 +139,25 @@ export class BookingsService {
             .getMany();
         
         return bookingHistory;
-    } catch (error) {
+    } catch {
         throw new BadRequestException('Could not retrieve booking history');
     }
 }
 
+async getBookingRequests(): Promise<Booking[]> {
+  const today = new Date();
+  try {
+      const bookingHistory = await this.bookingRepository
+          .createQueryBuilder('booking')
+          .where('booking.isApproved = false')
+          .getMany();
+      
+      return bookingHistory;
+  } catch {
+      throw new BadRequestException('Could not retrieve booking history');
+  }
+
+}
 }
 
 

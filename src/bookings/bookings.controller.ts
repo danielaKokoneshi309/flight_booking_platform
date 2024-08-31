@@ -36,4 +36,11 @@ export class BookingsController {
   getbookingHistory(@CurrentUser()user:Users){
 return this.bookingsService.getBookingHistory(user)
   }
+
+  @Get('/bookingRequests')
+@UseGuards(AuthGuard)
+@UseGuards(AdminGuard)
+  getbookingRequest(){
+return this.bookingsService.getBookingRequests()
+  }
 }
