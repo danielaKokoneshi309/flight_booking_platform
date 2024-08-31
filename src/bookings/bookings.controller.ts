@@ -6,11 +6,13 @@ import { Booking } from './booking.entity';
 import { AdminGuard } from 'src/guards/admin.guard';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { ApproveBookingDto } from './dto/approve-booking.dto';
+import { CurrentUser } from 'src/users/decorators/current-user.decorators';
+import { Users } from 'src/users/user.entity';
 
 @Controller('bookings')
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService) {}
-
+  @UseGuards(AuthGuard)
   @Post()
   async createBooking(@Body() createBookingDto: CreateBookingDto): Promise<Booking[]> {
     const { flightId, userIds, seatNumbers } = createBookingDto;
@@ -28,5 +30,10 @@ export class BookingsController {
   @UseGuards(AdminGuard)
   approveReport(@Param('id') id: number, @Body() body: ApproveBookingDto) {
     return this.bookingsService.changeApproval(id, body.isApproved);
+  }
+@Get('/bookingHistory')
+@UseGuards(AuthGuard)
+  getbookingHistory(@CurrentUser()user:Users){
+return this.bookingsService.getBookingHistory(user)
   }
 }

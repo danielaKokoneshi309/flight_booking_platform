@@ -112,22 +112,38 @@ export class BookingsService {
     const seatLetter = String.fromCharCode(65 + (seatIndex - 1) % 6); 
     return `${row}${seatLetter}`;
   }
+
   async changeApproval(id: number, isApproved: boolean) {
     try{
       const booking = await this.bookingRepository.findOneBy({ id });
     if (!booking) {
       throw new NotFoundException('Booking not found');
     }
-
     booking.isApproved = isApproved;
     return this.bookingRepository.save(booking);
     }
-    catch(error){
-      console.log(error)
-    throw new BadRequestException("Could not update")
+    catch{ 
+    throw new BadRequestException("Could not update booking")
     }
     
   }
+  async getBookingHistory(user: Users): Promise<Booking[]> {
+    const today = new Date();
+    try {
+        const bookingHistory = await this.bookingRepository
+            .createQueryBuilder('booking')
+            .innerJoinAndSelect('booking.flight', 'flight')
+            .where('booking.userId = :userId', { userId: user.id })
+            .andWhere('flight.arrivaleTime <= :today', { today })
+            .andWhere('booking.isApproved = true')
+            .getMany();
+        
+        return bookingHistory;
+    } catch (error) {
+        throw new BadRequestException('Could not retrieve booking history');
+    }
+}
+
 }
 
 
