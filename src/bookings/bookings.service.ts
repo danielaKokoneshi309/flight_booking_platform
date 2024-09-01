@@ -53,8 +53,9 @@ export class BookingsService {
       }
 
       let extraCost = 0;
-
+      let preferredSeat = false;
       if (seatNumber) {
+        preferredSeat = true;
         extraCost = this.PREFERRED_SEAT_COST;
 
      
@@ -67,7 +68,9 @@ export class BookingsService {
           throw new BadRequestException(`User with ID ${userId} has insufficient credits`);
         }
       } else {
-     
+        if (user.credits < flight.price ) {
+          throw new BadRequestException(`User with ID ${userId} has insufficient credits`);
+        }
         seatNumber = this.getRandomSeat(availableSeats);
         if (!seatNumber) {
           throw new BadRequestException('No available seats');
@@ -79,19 +82,13 @@ export class BookingsService {
         flight,
         user,
         seatNumber,
+        preferredSeat
       });
 
       bookings.push(booking);
       availableSeats.splice(availableSeats.indexOf(seatNumber), 1); 
 
-  
-      user.credits -= flight.price + extraCost;
-      await this.userRepository.save(user);
     }
-
-    
-    flight.availableSeats -= userIds.length;
-    await this.flightRepository.save(flight);
 
     return this.bookingRepository.save(bookings);
   }
@@ -113,20 +110,32 @@ export class BookingsService {
     return `${row}${seatLetter}`;
   }
 
-  async changeApproval(id: number, isApproved: boolean) {
-    try{
-      const booking = await this.bookingRepository.findOneBy({ id });
+  async changeApproval(id: number, isApproved: boolean): Promise<Booking> {
+    const booking = await this.bookingRepository.findOne({
+      where: { id },
+      relations: ['flight', 'user'],
+    });
+  
     if (!booking) {
       throw new NotFoundException('Booking not found');
     }
+  
+    if (isApproved && !booking.isApproved) {
+      const user = booking.user;
+      const flight = booking.flight;
+      const extraCost = booking.preferredSeat ? this.PREFERRED_SEAT_COST : 0;
+
+      user.credits -= flight.price + extraCost;
+      await this.userRepository.save(user);
+  
+      flight.availableSeats -= 1;
+      await this.flightRepository.save(flight);
+    }
+  
     booking.isApproved = isApproved;
     return this.bookingRepository.save(booking);
-    }
-    catch{ 
-    throw new BadRequestException("Could not update booking")
-    }
-    
   }
+  
   async getBookingHistory(user: Users): Promise<Booking[]> {
     const today = new Date();
     try {

@@ -27,7 +27,7 @@ export class BookingsController {
   }
   @Patch('/:id')
   @UseGuards(AuthGuard)
-  @UseGuards(AdminGuard)
+  // @UseGuards(AdminGuard)
   approveReport(@Param('id') id: number, @Body() body: ApproveBookingDto) {
     return this.bookingsService.changeApproval(id, body.isApproved);
   }

@@ -15,6 +15,8 @@ export class Booking {
   isApproved: boolean;
   @Column({ type: 'int', default: 0 })
   extraCost: number;
+  @Column({ default: false })
+  preferredSeat: boolean;
   @ManyToOne(() => Users, (user) => user.bookings)
   user: Users;
 
