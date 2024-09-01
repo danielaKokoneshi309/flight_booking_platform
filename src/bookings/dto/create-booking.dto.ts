@@ -6,12 +6,15 @@ export class CreateBookingDto {
 
   @IsArray()
   @ArrayNotEmpty()
-  @IsNumber({}, { each: true })
-  userIds: number[];
+//   @IsNumber({}, { each: true })
+//   userIds: number[];
 
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   seatNumbers?: string[];
+  @ArrayNotEmpty()
+  @IsString({ each: true })
+  passengers: string[]; 
 }
 

@@ -61,8 +61,8 @@ async update(id: number, attrs: Partial<Flight>) {
       const updatedFlight = await this.repo.save(flight);
     return updatedFlight;
     }
-    catch(error){
-      console.log(error)
+    catch{
+      
       throw new BadRequestException('Could not update flight');
     }
   }
@@ -79,9 +79,11 @@ async remove(id: number): Promise<void> {
       throw new BadRequestException('Could not remove flight');
     }
   }
+
   async findAll(){
     return await this.repo.find()
     }
+
 async findUpcomingFlights(): Promise<Flight[]>{
 const today = new Date();
     try{
@@ -141,7 +143,6 @@ async getNumberOfFlights(){
 catch{
   throw new BadRequestException('Could not retrieve number of flights');
 }}}
-function setDefaultAvailableSeats() {
-  throw new Error('Function not implemented.');
-}
+
+
 

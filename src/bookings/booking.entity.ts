@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, ManyToMany, JoinTable, OneToMany } from 'typeorm';
 import { Users } from 'src/users/user.entity';
 import { Flight } from 'src/flights/flights.entity';
 import { IsOptional } from 'class-validator';
@@ -9,18 +9,24 @@ export class Booking {
   id: number;
 
   @Column()
- seatNumber?: string;
+ seatNumber: string;
 
   @Column({ default: false })
   isApproved: boolean;
+
   @Column({ type: 'int', default: 0 })
   extraCost: number;
+  
   @Column({ default: false })
   preferredSeat: boolean;
+  @Column( { nullable:true  })
+  passengers: string; 
+  
   @ManyToOne(() => Users, (user) => user.bookings)
-  user: Users;
+   user: Users;
 
-  @ManyToOne(() => Flight, (flight) => flight.bookings)
+
+  @ManyToOne(() => Flight, (flight) => flight.bookings,{onUpdate:'CASCADE',onDelete:'CASCADE'})
   flight: Flight;
 }
 

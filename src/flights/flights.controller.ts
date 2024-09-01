@@ -50,7 +50,7 @@ export class FlightsController {
   async update(@Param('id') id: string, @Body() updateFlightDto: UpdateFlightDto) {
     return await this.flightsService.update(+id, updateFlightDto);
   }
-  @UseGuards(AdminGuard)
+   @UseGuards(AdminGuard)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return await this.flightsService.remove(+id);

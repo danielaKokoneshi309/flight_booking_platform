@@ -20,13 +20,14 @@ departureTime: Date;
 arrivaleTime:Date;
 @Column()
 price: number
-@Column('int',{ default: 0 }) // Add the new column
+@Column('int',{ default: 0 }) 
   availableSeats: number;
 
 @ManyToOne(() => Plane, (plane) => plane.flights)
   plane: Plane;
-@OneToMany(() => Booking, (booking) => booking.flight)
+@OneToMany(() => Booking, (booking) => booking.flight,{cascade:['insert','update','remove'],onDelete:'CASCADE',onUpdate:'CASCADE'})
   bookings: Booking[];
+
   @BeforeInsert()
   async setDefaultAvailableSeats() {
     if (this.plane) {

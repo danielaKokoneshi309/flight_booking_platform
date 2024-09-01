@@ -11,24 +11,24 @@ import { Users } from 'src/users/user.entity';
 
 @Controller('bookings')
 export class BookingsController {
-  constructor(private readonly bookingsService: BookingsService) {}
-  @UseGuards(AuthGuard)
-  @Post()
-  async createBooking(@Body() createBookingDto: CreateBookingDto): Promise<Booking[]> {
-    const { flightId, userIds, seatNumbers } = createBookingDto;
+ constructor(private readonly bookingsService: BookingsService) {}
 
-    
+@UseGuards(AuthGuard)
+  @Post()
+  async createBooking(@Body() createBookingDto: CreateBookingDto, @CurrentUser()user:Users): Promise<Booking[]> {
+   
+
     try {
-      const bookings = await this.bookingsService.bookSeats(flightId, userIds, seatNumbers);
-      return bookings;
+      return this.bookingsService.bookSeats(createBookingDto, user);
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
+
   @Patch('/:id')
   @UseGuards(AuthGuard)
-  // @UseGuards(AdminGuard)
-  approveReport(@Param('id') id: number, @Body() body: ApproveBookingDto) {
+  @UseGuards(AdminGuard)
+  approveBooking(@Param('id') id: number, @Body() body: ApproveBookingDto): Promise<Booking> {
     return this.bookingsService.changeApproval(id, body.isApproved);
   }
 @Get('/bookingHistory')
