@@ -1,5 +1,5 @@
 
-import { Injectable, BadRequestException, UseGuards, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, UseGuards, NotFoundException, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Booking } from './booking.entity';
@@ -9,9 +9,12 @@ import { Plane } from '../planes/plane.entity';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { EmailService } from 'src/emails/emails.service';
+import { BookingDto } from './dto/booking.dto';
+import { PdfService } from 'src/pdf/pdf.service';
 
 
-@Injectable()
+@Injectable(
+)
 export class BookingsService {
   private readonly PREFERRED_SEAT_COST = 3000;
 
@@ -20,6 +23,7 @@ export class BookingsService {
     @InjectRepository(Flight) private flightRepository: Repository<Flight>,
     @InjectRepository(Users) private userRepository: Repository<Users>,
     @InjectRepository(Plane) private planeRepository: Repository<Plane>,
+    private readonly pdfService: PdfService,
     private readonly emailService: EmailService
   ) {}
   @UseGuards(AuthGuard)
@@ -116,6 +120,9 @@ export class BookingsService {
     if (!booking) {
       throw new NotFoundException('Booking not found');
     }
+    if (booking.user.credits < booking.flight.price + booking.extraCost) {
+      throw new BadRequestException(`User with ID ${booking.user.id} has insufficient credits`);
+    }
     if (isApproved==true) {
       const user = booking.user;
       const flight = booking.flight;
@@ -129,12 +136,22 @@ export class BookingsService {
     }
     booking.isApproved = isApproved;
     await this.bookingRepository.save(booking);
-    const downloadUrl = isApproved==true?`http://localhost:3000/bookings/${booking.id}/download`: null;
+    const bookingDto: BookingDto = {
+      id: booking.id,
+      seatNumber: booking.seatNumber,
+      isApproved: booking.isApproved,
+      extraCost: booking.extraCost,
+      preferredSeat: booking.preferredSeat,
+      passengers: booking.passengers,
+      userId: booking.user.id,
+      flightId: booking.flight.id,
+    };
+    const pdfBuffer = await this.pdfService.generateBookingPdf(bookingDto);
     await this.emailService.sendBookingApprovalEmail(
       booking.user.email,
       booking.id,
       isApproved,
-      downloadUrl
+      pdfBuffer
     );
 
     return booking;
@@ -143,7 +160,7 @@ export class BookingsService {
     console.log(error)
     throw new BadRequestException("Bad request ")
   }
-    // return this.bookingRepository.save(booking);
+   
   }
  
   async getBookingHistory(user: Users): Promise<Booking[]> {
@@ -177,6 +194,11 @@ async getBookingRequests(): Promise<Booking[]> {
   }
 
 }
+async findBookingById(id: number): Promise<Booking> {
+  return this.bookingRepository.findOne({
+    where: { id },
+    relations: ['flight', 'user'],
+  });
 }
 
-
+}

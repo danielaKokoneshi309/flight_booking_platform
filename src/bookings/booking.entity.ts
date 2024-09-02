@@ -11,7 +11,7 @@ export class Booking {
   @Column()
  seatNumber: string;
 
-  @Column({ default: false })
+  @Column({ default: null })
   isApproved: boolean;
 
   @Column({ type: 'int', default: 0 })

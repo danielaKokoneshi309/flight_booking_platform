@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, UseGuards, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, UseGuards, Res, NotFoundException } from '@nestjs/common';
 import { Response } from 'express';
 
 import { BookingsService } from './bookings.service';
@@ -11,6 +11,7 @@ import { ApproveBookingDto } from './dto/approve-booking.dto';
 import { CurrentUser } from 'src/users/decorators/current-user.decorators';
 import { Users } from 'src/users/user.entity';
 import { PdfService } from 'src/pdf/pdf.service';
+import { BookingDto } from './dto/booking.dto';
 @Controller('bookings')
 export class BookingsController {
  constructor(private readonly bookingsService: BookingsService,
@@ -48,11 +49,25 @@ return this.bookingsService.getBookingHistory(user)
 return this.bookingsService.getBookingRequests()
   }
 
-  @Get(':bookingId/download')
-  async downloadTicket(@Param('bookingId') bookingId: number, @Res() res: Response) {
-    const ticket = await this.pdfService.generateBookingPdf(bookingId);
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'attachment; filename=ticket.pdf');
-    res.send(ticket);
-  }
+  // @Get(':bookingId/download')
+  // async downloadTicket(@Param('bookingId') bookingId: number, @Res() res: Response) {
+  //   const booking = await this.bookingsService.findBookingById(bookingId);
+  //   if (!booking) {
+  //     throw new NotFoundException('Booking not found');
+  //   }
+  //   const bookingDto: BookingDto = {
+  //     id: booking.id,
+  //     flightId: booking.flight.id,
+  //     userId: booking.user.id,
+  //     seatNumber: booking.seatNumber,
+  //     preferredSeat: booking.preferredSeat,
+  //     extraCost: booking.extraCost,
+  //     isApproved: booking.isApproved,
+  //     passengers: booking.passengers,  
+  //   };
+  //   const ticket = await this.pdfService.generateBookingPdf(bookingDto);
+  //   res.setHeader('Content-Type', 'application/pdf');
+  //   res.setHeader('Content-Disposition', 'attachment; filename=ticket.pdf');
+  //   res.send(ticket);
+  // }
 }
