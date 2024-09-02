@@ -8,6 +8,7 @@ import { Users } from '../users/user.entity';
 import { Plane } from '../planes/plane.entity';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { CreateBookingDto } from './dto/create-booking.dto';
+import { EmailService } from 'src/emails/emails.service';
 
 
 @Injectable()
@@ -19,6 +20,7 @@ export class BookingsService {
     @InjectRepository(Flight) private flightRepository: Repository<Flight>,
     @InjectRepository(Users) private userRepository: Repository<Users>,
     @InjectRepository(Plane) private planeRepository: Repository<Plane>,
+    private readonly emailService: EmailService
   ) {}
   @UseGuards(AuthGuard)
   
@@ -105,6 +107,7 @@ export class BookingsService {
   }
   
   async changeApproval(id: number, isApproved: boolean): Promise<Booking> {
+    try{
     const booking = await this.bookingRepository.findOne({
       where: { id },
       relations: ['flight', 'user'],
@@ -113,7 +116,7 @@ export class BookingsService {
     if (!booking) {
       throw new NotFoundException('Booking not found');
     }
-    if (isApproved && !booking.isApproved) {
+    if (isApproved==true) {
       const user = booking.user;
       const flight = booking.flight;
       const extraCost = booking.preferredSeat ? this.PREFERRED_SEAT_COST : 0;
@@ -125,7 +128,22 @@ export class BookingsService {
       await this.flightRepository.save(flight);
     }
     booking.isApproved = isApproved;
-    return this.bookingRepository.save(booking);
+    await this.bookingRepository.save(booking);
+    const downloadUrl = isApproved==true?`http://localhost:3000/bookings/${booking.id}/download`: null;
+    await this.emailService.sendBookingApprovalEmail(
+      booking.user.email,
+      booking.id,
+      isApproved,
+      downloadUrl
+    );
+
+    return booking;
+  }
+  catch(error){
+    console.log(error)
+    throw new BadRequestException("Bad request ")
+  }
+    // return this.bookingRepository.save(booking);
   }
  
   async getBookingHistory(user: Users): Promise<Booking[]> {

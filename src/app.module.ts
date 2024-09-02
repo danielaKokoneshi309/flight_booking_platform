@@ -8,6 +8,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CurrentUserMiddleware } from './users/middleware/current-user.middleware';
 import { PlanesModule } from './planes/planes.module';
 import { BookingsModule } from './bookings/bookings.module';
+import { EmailsModule } from './emails/emails.module';
+import { PdfService } from './pdf/pdf.service';
+import { PdfModule } from './pdf/pdf.module';
+import { MailerModule } from '@nestjs-modules/mailer';
 const cookieSession= require('cookie-session')
 
 
@@ -21,10 +25,12 @@ const cookieSession= require('cookie-session')
     UsersModule,
     FlightsModule,
     PlanesModule,
-    BookingsModule
+    BookingsModule,
+    EmailsModule,
+    PdfModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, PdfService],
 })
 export class AppModule {
 

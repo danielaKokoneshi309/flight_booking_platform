@@ -1,4 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, BadRequestException, UseGuards, Res } from '@nestjs/common';
+import { Response } from 'express';
+
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { UpdateBookingDto } from './dto/update-booking.dto';
@@ -8,10 +10,12 @@ import { AuthGuard } from 'src/guards/auth.guard';
 import { ApproveBookingDto } from './dto/approve-booking.dto';
 import { CurrentUser } from 'src/users/decorators/current-user.decorators';
 import { Users } from 'src/users/user.entity';
-
+import { PdfService } from 'src/pdf/pdf.service';
 @Controller('bookings')
 export class BookingsController {
- constructor(private readonly bookingsService: BookingsService) {}
+ constructor(private readonly bookingsService: BookingsService,
+  private readonly pdfService: PdfService
+ ) {}
 
 @UseGuards(AuthGuard)
   @Post()
@@ -26,8 +30,8 @@ export class BookingsController {
   }
 
   @Patch('/:id')
-  @UseGuards(AuthGuard)
-  @UseGuards(AdminGuard)
+  //  @UseGuards(AuthGuard)
+  // @UseGuards(AdminGuard)
   approveBooking(@Param('id') id: number, @Body() body: ApproveBookingDto): Promise<Booking> {
     return this.bookingsService.changeApproval(id, body.isApproved);
   }
@@ -42,5 +46,13 @@ return this.bookingsService.getBookingHistory(user)
 @UseGuards(AdminGuard)
   getbookingRequest(){
 return this.bookingsService.getBookingRequests()
+  }
+
+  @Get(':bookingId/download')
+  async downloadTicket(@Param('bookingId') bookingId: number, @Res() res: Response) {
+    const ticket = await this.pdfService.generateBookingPdf(bookingId);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename=ticket.pdf');
+    res.send(ticket);
   }
 }

@@ -6,9 +6,11 @@ import { Booking } from './booking.entity';
 import { Plane } from 'src/planes/plane.entity';
 import { Flight } from 'src/flights/flights.entity';
 import { Users } from 'src/users/user.entity';
+import { EmailsModule } from 'src/emails/emails.module';
+import { PdfModule } from 'src/pdf/pdf.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Booking,Plane,Flight,Users])],
+  imports: [TypeOrmModule.forFeature([Booking,Plane,Flight,Users]),EmailsModule,PdfModule],
   controllers: [BookingsController],
   providers: [BookingsService],
 })
