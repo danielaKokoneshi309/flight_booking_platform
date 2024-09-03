@@ -6,8 +6,6 @@ export class CreateBookingDto {
 
   @IsArray()
   @ArrayNotEmpty()
-//   @IsNumber({}, { each: true })
-//   userIds: number[];
 
   @IsOptional()
   @IsArray()

@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, ManyToMany, JoinTable, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, ManyToMany, JoinTable, OneToMany, JoinColumn } from 'typeorm';
 import { Users } from 'src/users/user.entity';
 import { Flight } from 'src/flights/flights.entity';
 import { IsOptional } from 'class-validator';
@@ -21,7 +21,7 @@ export class Booking {
   preferredSeat: boolean;
   @Column( { nullable:true  })
   passengers: string; 
-  
+
   @ManyToOne(() => Users, (user) => user.bookings)
    user: Users;
 

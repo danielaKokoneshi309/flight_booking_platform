@@ -26,73 +26,116 @@ export class BookingsService {
     private readonly pdfService: PdfService,
     private readonly emailService: EmailService
   ) {}
-  @UseGuards(AuthGuard)
-  
 
   @UseGuards(AuthGuard)
   async bookSeats(
-    createBookingDto:CreateBookingDto,user:Users): Promise<Booking[]> {
-     const { flightId, passengers, seatNumbers } = createBookingDto;
- 
-     const flight = await this.flightRepository.findOne({
-       where: { id: flightId },
-       relations: ['plane', 'bookings'],
-     });
- 
-     if (!flight) {
-       throw new BadRequestException('Flight not found');
-     }
- 
-     const plane = flight.plane;
- 
-     if (flight.availableSeats - flight.bookings.length < passengers.length) {
-       throw new BadRequestException('Not enough available seats on this flight');
-     }
- 
-     const availableSeats = this.getAvailableSeats(flight);
-     const bookings: Booking[] = [];
- 
-     for (let i = 0; i < passengers.length; i++) {
-       const passenger = passengers[i];
-       let seatNumber = seatNumbers?.[i]; 
- 
-       
- 
-       let extraCost = 0;
-       let preferredSeat = false;
-       if (seatNumber) {
-         preferredSeat = true;
-         extraCost = this.PREFERRED_SEAT_COST;
- 
-         if (!availableSeats.includes(seatNumber)) {
-           throw new BadRequestException(`Seat number ${seatNumber} is not available`);
-         }
-         if (user.credits < flight.price + extraCost) {
-           throw new BadRequestException(`User with ID ${user.id} has insufficient credits`);
-         }
-       } else {
-         if (user.credits < flight.price ) {
-           throw new BadRequestException(`User with ID ${user.id} has insufficient credits`);
-         }
-         seatNumber = this.getRandomSeat(availableSeats);
-         if (!seatNumber) {
-           throw new BadRequestException('No available seats');
-         }
-       }      
-       const booking = this.bookingRepository.create({
-         flight,
-         seatNumber,
-         user,
-         preferredSeat,
-         passengers: passenger,
-         extraCost
-       });
-       bookings.push(booking);
-       availableSeats.splice(availableSeats.indexOf(seatNumber), 1); 
-     }
-     return this.bookingRepository.save(bookings);
-   }
- 
+    createBookingDto: CreateBookingDto, 
+    user: Users,
+    returnFlightId?: number 
+  ): Promise<Booking[]> {
+    const { flightId, passengers, seatNumbers } = createBookingDto;
+  
+
+    const flight = await this.flightRepository.findOne({
+      where: { id: flightId },
+      relations: ['plane', 'bookings'],
+    });
+  
+    if (!flight) {
+      throw new BadRequestException('Flight not found');
+    }
+  
+
+    const plane = flight.plane;
+    if (flight.availableSeats - flight.bookings.length < passengers.length) {
+      throw new BadRequestException('Not enough available seats on this flight');
+    }
+  
+    const availableSeats = this.getAvailableSeats(flight);
+    const bookings: Booking[] = [];
+  
+    for (let i = 0; i < passengers.length; i++) {
+      
+      const passenger = passengers[i];
+      let seatNumber = seatNumbers?.[i];
+  
+      let extraCost = 0;
+      let preferredSeat = false;
+      if (seatNumber) {
+        preferredSeat = true;
+        extraCost = this.PREFERRED_SEAT_COST;
+  
+        if (!availableSeats.includes(seatNumber)) {
+          throw new BadRequestException(`Seat number ${seatNumber} is not available`);
+        }
+        
+        if (user.credits < flight.price + extraCost) {
+          throw new BadRequestException(`User with ID ${user.id} has insufficient credits`);
+        }
+      } else {
+        if (user.credits < flight.price) {
+          throw new BadRequestException(`User with ID ${user.id} has insufficient credits`);
+        }
+        seatNumber = this.getRandomSeat(availableSeats);
+        if (!seatNumber) {
+          throw new BadRequestException('No available seats');
+        }
+      }
+  
+      const booking = this.bookingRepository.create({
+        flight,
+        seatNumber,
+        user,
+        preferredSeat,
+        passengers: passenger,
+        extraCost,
+      });
+      
+      bookings.push(booking);
+      availableSeats.splice(availableSeats.indexOf(seatNumber), 1);
+    }
+    
+    if (returnFlightId) {
+      const returnFlight = await this.flightRepository.findOne({
+        where: { id: returnFlightId },
+        relations: ['plane', 'bookings'],
+      });
+    
+  
+      if (!returnFlight) {
+        throw new BadRequestException('Return flight not found');
+      }
+  
+      const returnAvailableSeats = this.getAvailableSeats(returnFlight);
+
+      if (returnAvailableSeats.length < passengers.length) {
+        throw new BadRequestException('Not enough available seats on the return flight');
+      }      
+      const returnBookings: Booking[] = [];
+      for (const booking of bookings) {
+        const returnBooking = this.bookingRepository.create({
+          flight: returnFlight,
+          seatNumber: booking.seatNumber, 
+          user,
+          preferredSeat: booking.preferredSeat,
+          passengers: booking.passengers,
+          extraCost: booking.extraCost, 
+        });
+        
+        returnBookings.push(returnBooking);
+        availableSeats.splice(returnAvailableSeats.indexOf(booking.seatNumber), 1);
+      }
+      await this.bookingRepository.save(returnBookings);
+    }
+    
+
+    const savedBooking = await this.bookingRepository.save(bookings);
+
+    return savedBooking;
+  }
+  
+  
+  
   private getAvailableSeats(flight: Flight): string[] {
     const allSeats = Array.from({ length: flight.availableSeats}, (_, i) => this.generateSeatLabel(i + 1));
     const bookedSeats = flight.bookings.map(booking => booking.seatNumber);
