@@ -22,6 +22,7 @@ export class Booking {
   @Column( { nullable:true  })
   passengers: string; 
 
+  
   @ManyToOne(() => Users, (user) => user.bookings)
    user: Users;
 

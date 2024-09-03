@@ -20,7 +20,8 @@ export class BookingDto {
 
   preferredSeat: boolean;
 
-  passengers: string; 
+  passengers: string;
+
   
 
 userId: number;

@@ -11,6 +11,7 @@ import { CreateBookingDto } from './dto/create-booking.dto';
 import { EmailService } from 'src/emails/emails.service';
 import { BookingDto } from './dto/booking.dto';
 import { PdfService } from 'src/pdf/pdf.service';
+import { getRepository } from 'typeorm';
 
 
 @Injectable(
@@ -26,7 +27,7 @@ export class BookingsService {
     private readonly pdfService: PdfService,
     private readonly emailService: EmailService
   ) {}
-
+   
   @UseGuards(AuthGuard)
   async bookSeats(
     createBookingDto: CreateBookingDto, 
@@ -64,6 +65,7 @@ export class BookingsService {
       if (seatNumber) {
         preferredSeat = true;
         extraCost = this.PREFERRED_SEAT_COST;
+       
   
         if (!availableSeats.includes(seatNumber)) {
           throw new BadRequestException(`Seat number ${seatNumber} is not available`);
@@ -81,7 +83,8 @@ export class BookingsService {
           throw new BadRequestException('No available seats');
         }
       }
-      console.log(user)
+
+      
       const booking = this.bookingRepository.create({
         flight,
         seatNumber,
@@ -89,10 +92,13 @@ export class BookingsService {
         preferredSeat,
         passengers: passenger,
         extraCost,
+    
       });
       
       bookings.push(booking);
+    
       availableSeats.splice(availableSeats.indexOf(seatNumber), 1);
+      
     }
     
     if (returnFlightId) {
@@ -134,7 +140,8 @@ export class BookingsService {
           user,
           preferredSeat: booking.preferredSeat,
           passengers: booking.passengers,
-          extraCost: booking.extraCost, 
+          extraCost: booking.extraCost,
+        
         });
         
         returnBookings.push(returnBooking);
@@ -243,7 +250,7 @@ async getBookingRequests(): Promise<Booking[]> {
   try {
       const bookingHistory = await this.bookingRepository
           .createQueryBuilder('booking')
-          .where('booking.isApproved = false')
+          .where('booking.isApproved IS NULL')
           .getMany();
       
       return bookingHistory;
@@ -259,4 +266,81 @@ async findBookingById(id: number): Promise<Booking> {
   });
 }
 
+async getTotaRevenue():Promise<number>{
+  const result = await this.bookingRepository
+  .createQueryBuilder('booking')
+  .leftJoinAndSelect('booking.flight', 'flight')
+  .select('SUM(COALESCE(flight.price, 0) + COALESCE(booking.extraCost, 0))', 'totalRevenue')
+  .getRawOne();
+
+
+  return result.totalRevenue ? parseFloat(result.totalRevenue) : 0;
 }
+async getTotalPassengers(): Promise<number> {
+  try {
+    const result = await this.bookingRepository
+      .createQueryBuilder('booking')
+      .select("COUNT(DISTINCT passenger_id) AS totalPassengers")
+      .from(subQuery => {
+        return subQuery
+          .select('UNNEST(STRING_TO_ARRAY("booking"."passengers", \',\')) AS passenger_id')
+          .from('booking', 'booking')
+          .where('"booking"."passengers" IS NOT NULL');
+      }, 'sub')
+      .getRawOne();
+
+    return result
+  } catch (error) {
+    console.error('Error retrieving total number of distinct passengers:', error);
+    throw new BadRequestException('Could not retrieve the total number of distinct passengers');
+  }
+}
+
+async getTopClientsByCreditsSpent(): Promise<any[]> {
+  try {
+    const topClients = await this.bookingRepository
+      .createQueryBuilder('booking')
+      .innerJoinAndSelect('booking.user', 'user')
+      .innerJoinAndSelect('booking.flight', 'flight')
+      .select('user.id', 'userId')
+      .addSelect('user.name', 'userName')
+      .addSelect('user.lastName', 'userLastName')
+      .addSelect('SUM(booking.extraCost) + SUM(flight.price) AS totalSpent') 
+      .groupBy('user.id')
+      .orderBy('totalSpent', 'DESC')
+      .limit(3)
+      .getRawMany();
+console.log(topClients)
+    return topClients;
+  } catch (error) {
+
+    throw new BadRequestException('Could not retrieve top clients by credits spent');
+  }
+}
+async getTopClientsByBookingMade(): Promise<any[]> {
+  try {
+    const topClients = await this.bookingRepository
+      .createQueryBuilder('booking')
+      .innerJoinAndSelect('booking.user', 'user')
+      .select('user.id', 'userId')
+      .addSelect('user.name', 'userName')
+      .addSelect('user.lastName', 'userLastName')
+      .addSelect('Count(booking.id) AS TotalBooking') 
+      .groupBy('user.id')
+      .orderBy('TotalBooking', 'DESC')
+      .limit(3)
+      .getRawMany();
+console.log(topClients)
+    return topClients;
+  } catch (error) {
+    
+    throw new BadRequestException('Could not retrieve top clients by credits spent');
+  }
+}
+
+
+}
+
+
+
+

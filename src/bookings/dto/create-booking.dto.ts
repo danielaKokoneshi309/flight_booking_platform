@@ -1,4 +1,4 @@
-import { IsArray, IsNumber, IsOptional, IsString, ArrayNotEmpty } from 'class-validator';
+import { IsArray, IsNumber, IsOptional, IsString, ArrayNotEmpty, Min } from 'class-validator';
 
 export class CreateBookingDto {
   @IsNumber()
@@ -14,5 +14,6 @@ export class CreateBookingDto {
   @ArrayNotEmpty()
   @IsString({ each: true })
   passengers: string[]; 
+
 }
 

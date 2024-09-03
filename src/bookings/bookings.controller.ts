@@ -44,11 +44,27 @@ return this.bookingsService.getBookingHistory(user)
 
   @Get('/bookingRequests')
 @UseGuards(AuthGuard)
-@UseGuards(AdminGuard)
+ @UseGuards(AdminGuard)
   getbookingRequest(){
 return this.bookingsService.getBookingRequests()
   }
+@Get('/totalRevenue')
+  getTotalRevenue(){
+    return this.bookingsService.getTotaRevenue()
+  }
 
+  @Get('/totalPassangers')
+  getNumberOfPassangers(){
+    return this.bookingsService.getTotalPassengers()
+  }
+  @Get('/getTopClientsByCreditsSpent')
+  getTopClientsByCreditsSpent(){
+    return this.bookingsService.getTopClientsByCreditsSpent()
+  }
+  @Get('/getTopClientsByBookingMade')
+  getTopClientsByBookingMade(){
+    return this.bookingsService.getTopClientsByBookingMade()
+  }
 }
 
 
