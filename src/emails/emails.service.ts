@@ -11,7 +11,7 @@ export class EmailService {
     to: string,
     bookingId: number,
     isApproved: boolean,
-    pdfBuffer:Buffer
+    pdfBuffer?:Buffer
   ): Promise<void> {
     const subject = isApproved==true ? 'Your Booking is Approved!' : 'Your Booking is Rejected';
     const text = isApproved
@@ -23,15 +23,15 @@ export class EmailService {
 <p>You can find your ticket attached to this email.</p>`
       : `<p>Your booking with ID ${bookingId} has been rejected.</p>`;
 
-    const msg = {
+    const msg: sgMail.MailDataRequired = {
       to,
       from: 'daniela.kokoneshi@softup.co',
       subject,
       text,
       html,
-      attachments: pdfBuffer ? [
+      attachments:isApproved==true &&  pdfBuffer ? [
         {
-          content: pdfBuffer.toString('base64'), // Convert the Buffer to base64 string
+          content: pdfBuffer.toString('base64'), 
           filename: 'ticket.pdf',
           type: 'application/pdf',
           disposition: 'attachment',
