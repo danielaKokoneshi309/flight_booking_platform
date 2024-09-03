@@ -12,6 +12,9 @@ import { EmailsModule } from './emails/emails.module';
 import { PdfService } from './pdf/pdf.service';
 import { PdfModule } from './pdf/pdf.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+
+import { SeedModule } from './seed/seed.module';
+import { PlanesService } from './planes/planes.service';
 const cookieSession= require('cookie-session')
 
 
@@ -27,7 +30,8 @@ const cookieSession= require('cookie-session')
     PlanesModule,
     BookingsModule,
     EmailsModule,
-    PdfModule
+    PdfModule,
+    SeedModule
   ],
   controllers: [AppController],
   providers: [AppService, PdfService],

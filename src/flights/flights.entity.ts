@@ -23,7 +23,7 @@ price: number
 @Column('int',{ default: 0 }) 
   availableSeats: number;
 
-@ManyToOne(() => Plane, (plane) => plane.flights)
+@ManyToOne(() => Plane, (plane) => plane.flights,{onUpdate:'CASCADE',onDelete:'CASCADE'})
   plane: Plane;
 @OneToMany(() => Booking, (booking) => booking.flight,{cascade:['insert','update','remove'],onDelete:'CASCADE',onUpdate:'CASCADE'})
   bookings: Booking[];

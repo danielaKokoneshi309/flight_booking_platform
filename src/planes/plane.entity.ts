@@ -12,7 +12,7 @@ export class Plane {
   @Column('int')
  numberOfSeats: number;
 
-  @OneToMany(() => Flight, (flight) => flight.plane)
+  @OneToMany(() => Flight, (flight) => flight.plane,{cascade:['insert','update','remove'],onDelete:'CASCADE',onUpdate:'CASCADE'})
   flights: Flight[];
  
 }
