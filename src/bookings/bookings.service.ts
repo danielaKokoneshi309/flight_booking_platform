@@ -68,7 +68,7 @@ export class BookingsService {
         if (!availableSeats.includes(seatNumber)) {
           throw new BadRequestException(`Seat number ${seatNumber} is not available`);
         }
-        
+       
         if (user.credits < flight.price + extraCost) {
           throw new BadRequestException(`User with ID ${user.id} has insufficient credits`);
         }
@@ -81,7 +81,7 @@ export class BookingsService {
           throw new BadRequestException('No available seats');
         }
       }
-  
+      console.log(user)
       const booking = this.bookingRepository.create({
         flight,
         seatNumber,
@@ -105,12 +105,27 @@ export class BookingsService {
       if (!returnFlight) {
         throw new BadRequestException('Return flight not found');
       }
+      if (returnFlight.departureCountry !== flight.departureCountry) {
+        throw new BadRequestException('Return flight must depart from the same country as the initial flight ');
+      }
   
+     
+      if (returnFlight.departureTime <= flight.departureTime) {
+        throw new BadRequestException('Return flight must depart after the initial flight\'s departure time');
+      }
       const returnAvailableSeats = this.getAvailableSeats(returnFlight);
 
       if (returnAvailableSeats.length < passengers.length) {
         throw new BadRequestException('Not enough available seats on the return flight');
       }      
+      const returnFlightPrice = flight.price * 2; 
+
+  
+     
+      if (user.credits < returnFlightPrice) {
+        throw new BadRequestException(`User with ID ${user.id} has insufficient credits for the return flight`);
+      }
+
       const returnBookings: Booking[] = [];
       for (const booking of bookings) {
         const returnBooking = this.bookingRepository.create({
