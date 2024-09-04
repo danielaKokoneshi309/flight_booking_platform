@@ -11,7 +11,7 @@ import { CreateBookingDto } from './dto/create-booking.dto';
 import { EmailService } from 'src/emails/emails.service';
 import { BookingDto } from './dto/booking.dto';
 import { PdfService } from 'src/pdf/pdf.service';
-import { getRepository } from 'typeorm';
+
 
 
 @Injectable(
@@ -111,8 +111,8 @@ export class BookingsService {
       if (!returnFlight) {
         throw new BadRequestException('Return flight not found');
       }
-      if (returnFlight.departureCountry !== flight.departureCountry) {
-        throw new BadRequestException('Return flight must depart from the same country as the initial flight ');
+      if (returnFlight.departureCountry !== flight.destianationCountry) {
+        throw new BadRequestException('Return flight must depart from the same country as the initial flight destination country ');
       }
   
      
@@ -337,7 +337,36 @@ console.log(topClients)
     throw new BadRequestException('Could not retrieve top clients by credits spent');
   }
 }
+async remove(id: number): Promise<void> {
+  const flight = await this.findBookingById(id);
+  if (!flight) {
+    throw new NotFoundException('Booking not found');
+  }
+  try{
+    await this.bookingRepository.remove(flight);
+  }
+  catch{
+    throw new BadRequestException('Could not remove booking');
+  }
 
+  
+}
+async removeUserBooking(bookingId: number, userId: number): Promise<void> {
+  const booking = await this.findBookingById(bookingId);
+  if (!booking) {
+    throw new NotFoundException('Booking not found');
+  }
+
+  if (booking.user.id !== userId) {
+    throw new BadRequestException('You are not authorized to delete this booking');
+  }
+
+  try {
+    await this.bookingRepository.remove(booking);
+  } catch {
+    throw new BadRequestException('Could not remove booking');
+  }
+}
 
 }
 

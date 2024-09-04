@@ -14,5 +14,5 @@ export class GetFlightDto{
     @IsDateString()
     @IsOptional()
     arrivaleTime:Date;
-
+    
 }

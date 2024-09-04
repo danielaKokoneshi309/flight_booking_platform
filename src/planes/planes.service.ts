@@ -18,8 +18,8 @@ export class PlanesService {
    const subquery= await this.flightRepo
    .createQueryBuilder('flight')
    .select('flight.planeId')
-   .where('"flight"."arrivaleTime"<:departureTime',{departureTime})
-   .andWhere('"flight"."departureTime"> :arrivaleTime',{arrivaleTime});
+   .where('"flight"."arrivaleTime">:departureTime',{departureTime})
+   .andWhere('"flight"."departureTime"< :arrivaleTime',{arrivaleTime});
 
    const availablePlanes= await this.repo
    .createQueryBuilder('plane')

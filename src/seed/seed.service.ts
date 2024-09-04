@@ -88,8 +88,8 @@ export class SeedService implements OnModuleInit {
           plane: { id: 1} as Plane, 
         },
         {
-          departureCountry: 'Albania',
-          destianationCountry: 'Thailand',
+          departureCountry: 'Argentina',
+          destianationCountry: 'Albania',
           departureTime: new Date('2024-11-15T05:00:00Z'),
           arrivaleTime: new Date('2024-11-15T09:00:00Z'),
           price: 10000,
